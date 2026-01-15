@@ -19,8 +19,12 @@ DROP MATERIALIZED VIEW IF EXISTS album_financiero.ds_nombre;
 DROP MATERIALIZED VIEW IF EXISTS album_financiero.ds_ingresos;
 DROP MATERIALIZED VIEW IF EXISTS album_financiero.dim_ingresos;
 DROP MATERIALIZED VIEW IF EXISTS album_financiero.ds_inversiones_impacto;
+DROP MATERIALIZED VIEW IF EXISTS album_financiero.dim_clave;
+DROP MATERIALIZED VIEW IF EXISTS album_financiero.dim_canal_ingreso;
 
 
+
+REFRESH MATERIALIZED VIEW album_financiero.dim_clave
 REFRESH MATERIALIZED VIEW album_financiero.dim_tipo_inversion;
 REFRESH MATERIALIZED VIEW album_financiero.dim_metodo_pago_general;
 REFRESH MATERIALIZED VIEW album_financiero.dim_nombre;

@@ -157,3 +157,26 @@ ORDER BY moneda ASC;
 
 CREATE UNIQUE INDEX pk_dim_ingresos
 ON album_financiero.dim_tipo_cambio_monedas (moneda);
+
+
+
+--CSV036 dim_clave
+CREATE MATERIALIZED VIEW album_financiero.dim_clave AS
+SELECT DISTINCT clave
+FROM album_financiero.fact_c_diaria
+WHERE clave IS NOT NULL
+WITH NO DATA;
+
+CREATE UNIQUE INDEX pk_dim_clave
+ON album_financiero.dim_dim_clave (clave);
+
+
+
+--CSV032  dim_canal_ingreso
+CREATE MATERIALIZED VIEW album_financiero.dim_canal_ingreso AS
+SELECT DISTINCT canal_ingreso
+FROM album_financiero.v_ds_ingresos
+ORDER BY canal_ingreso ASC;
+
+CREATE UNIQUE INDEX pk_dim_canal_ingreso
+ON album_financiero.dim_canal_ingreso (canal_ingreso);

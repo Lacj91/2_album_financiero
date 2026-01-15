@@ -1,6 +1,7 @@
--- This script generates datasets that classify income transactions by category and source, and investment movements by detected investment type and action. 
--- It also derives an investment impact dataset that separates monthly balance changes into movement-driven effects and market-driven performance for accurate investment analysis in Power BI.
-
+/*
+This script generates datasets that classify income transactions by category and source, and investment movements by detected investment type and action. 
+It also derives an investment impact dataset that separates monthly balance changes into movement-driven effects and market-driven performance for accurate investment analysis in Power BI.
+*/
 
 -- CSV007  ds_inversiones_movimientos
 CREATE MATERIALIZED VIEW album_financiero.v_ds_inversiones_movimientos AS
@@ -36,34 +37,44 @@ ON album_financiero.ds_inversiones_movimientos (id);
 
 -- CSV031  ds_ingresos
 CREATE MATERIALIZED VIEW album_financiero.v_ds_ingresos AS
-SELECT id,
-fecha,
-clave,
-descripcion,
-monto,
-CASE 
-	WHEN monto < 0 THEN 'Egreso'
-	WHEN monto > 0 THEN 'Ingreso'
-	ELSE NULL
-	END 						            AS categoria_ingreso,
-CASE
-    WHEN descripcion ILIKE '%puntos premia%' THEN 'Monedero'
-    WHEN clave = 'inversion' AND descripcion ILIKE '%Ahorro%' THEN 'Ahorro'
-	WHEN clave = 'comercio' THEN 'Comercio'
-    WHEN clave = 'inversion' THEN 'Trabajo'
-	WHEN clave = 'transaccion' THEN 'Ingreso'
-	ELSE 'Otros'
-    END 								   AS tipo_ingreso,
-periodo_fact_c_diaria
-FROM album_financiero.fact_c_diaria		   AS cd
+SELECT
+    id,
+    fecha,
+    clave,
+    descripcion,
+    lugar_de_uso,
+    monto,
+    CASE 
+        WHEN monto < 0 THEN 'Egreso'
+        WHEN monto > 0 THEN 'Ingreso'
+        ELSE NULL
+    END AS categoria_ingreso,
+    CASE
+        WHEN descripcion ILIKE '%monedero%' THEN 'Monedero'
+        WHEN clave = 'inversion' AND descripcion ILIKE '%Ahorro%' THEN 'Ahorro'
+        WHEN clave = 'inversion' AND descripcion ILIKE '%Divisas%' THEN 'Cambio de Divisas'
+        WHEN clave = 'actividad' THEN 'Actividad Comercial'
+        WHEN clave = 'inversion' THEN 'Trabajo'
+        WHEN clave = 'transaccion' THEN 'Ingreso'
+        ELSE 'Otros'
+    END AS tipo_ingreso,
+    CASE
+        WHEN clave = 'inversion' AND descripcion ILIKE '%Divisas%' THEN 'Cambio de Divisas'
+        WHEN clave = 'actividad' THEN 'Actividad Economica'
+        ELSE SPLIT_PART(lugar_de_uso, ' ', 1)
+    END AS canal_ingreso,
+    periodo_fact_c_diaria
+FROM album_financiero.fact_c_diaria AS cd
 WHERE razon_uso = 'INGRESO'
 OR (razon_uso = 'P.FORMAL' AND clave = 'transaccion')
 WITH NO DATA;
+
 --
 CREATE MATERIALIZED VIEW album_financiero.ds_ingresos AS
 SELECT id,
 categoria_ingreso,
-tipo_ingreso
+tipo_ingreso,
+canal_ingreso
 FROM album_financiero.v_ds_ingresos
 WITH NO DATA;
 
